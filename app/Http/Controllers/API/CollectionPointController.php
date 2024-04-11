@@ -10,6 +10,14 @@ class CollectionPointController extends APIController
 {
     public function index(Request $request)
     {
+        $response = Http::withoutVerifying()
+            ->timeout(60)
+            ->withUserAgent('Farmaciasdirect-Fdgo')
+            ->withToken(env('TOKEN_FDGO_IN_MADRE'))
+            ->asForm()
+            ->post(sprintf(env('MADRE_COLLECTION_POINTS_ENDPOINT')));
+        dd($response);
+        
         $zipCode = $request->input('zip');
 
         // Intenta recuperar los datos de la caché utilizando el código postal como clave
@@ -18,7 +26,6 @@ class CollectionPointController extends APIController
             return CollectionPoint::where('postal_code', $zipCode)->get();
         });
 
-        // Devuelve los puntos de colección en formato JSON
         return response()->json($collectionPoints);
     }
 }
