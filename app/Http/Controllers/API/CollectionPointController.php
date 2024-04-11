@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Models\CollectionPoint;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class CollectionPointController extends APIController
 {
@@ -17,7 +18,7 @@ class CollectionPointController extends APIController
             ->asForm()
             ->post(sprintf(env('MADRE_COLLECTION_POINTS_ENDPOINT')));
         dd($response);
-        
+
         $zipCode = $request->input('zip');
 
         // Intenta recuperar los datos de la caché utilizando el código postal como clave
