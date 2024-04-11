@@ -21,12 +21,12 @@ class UpdateCollectionPointsJob implements ShouldQueue
             ->withUserAgent('Farmaciasdirect-Fdgo')
             ->withToken(env('TOKEN_FDGO_IN_MADRE'))
             ->asForm()
-            ->post(sprintf(env('MADRE_COLLECTION_POINTS_ENDPOINT')));
+            ->get(sprintf(env('MADRE_COLLECTION_POINTS_ENDPOINT')));
         dd($response);
         if ($response->successful()) {
             $collectionPointsData = $response->json();
 
-            CollectionPoint::truncate(); 
+            CollectionPoint::truncate();
 
             foreach ($collectionPointsData as $pointData) {
                 CollectionPoint::create($pointData);
