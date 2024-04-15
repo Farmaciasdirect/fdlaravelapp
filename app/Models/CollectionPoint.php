@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class CollectionPoint extends Model
 {
     use HasFactory;
-    protected $table = 'collection_points'; 
+    protected $table = 'collection_points';
+    public $timestamps = false;
 
     protected $fillable = [
         'agency',

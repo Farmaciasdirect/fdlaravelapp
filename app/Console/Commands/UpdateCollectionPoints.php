@@ -12,7 +12,7 @@ class UpdateCollectionPoints extends Command
 
     public function handle()
     {
-        dispatch(new UpdateCollectionPointsJob());
+        UpdateCollectionPointsJob::dispatch()->onQueue("collection-points");
         $this->info('Job Creado Correctamente.');
     }
 }

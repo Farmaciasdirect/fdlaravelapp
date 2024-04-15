@@ -8,7 +8,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; 
 use App\Models\CollectionPoint;
+use Exception;
 
 class UpdateCollectionPointsJob implements ShouldQueue
 {
@@ -18,22 +21,32 @@ class UpdateCollectionPointsJob implements ShouldQueue
     {
         $response = Http::withoutVerifying()
             ->timeout(60)
-            ->withUserAgent('Farmaciasdirect-Fdgo')
+            ->withUserAgent(env('USER_AGENT_AUTHORIZED'))
             ->withToken(env('TOKEN_FDGO_IN_MADRE'))
             ->asForm()
             ->get(sprintf(env('MADRE_COLLECTION_POINTS_ENDPOINT')));
-        dd($response);
+
         if ($response->successful()) {
+            DB::beginTransaction();
+
             $collectionPointsData = $response->json();
-
-            CollectionPoint::truncate();
-
-            foreach ($collectionPointsData as $pointData) {
-                CollectionPoint::create($pointData);
+            
+            try {
+                CollectionPoint::truncate();
+                foreach ($collectionPointsData as $pointData) {
+                    unset($pointData['created_at']);
+                    unset($pointData['updated_at']);
+                    CollectionPoint::insert($pointData);
+                }
+                DB::commit();
+                Log::info('Collection points updated successfully.');
+            } catch (Exception $e) {
+                DB::rollBack();
+                Log::error('Failed to update collection points: ' . $e->getMessage());
+                throw $e;
             }
         } else {
-            // Manejar errores si la llamada a la API falla
-            logger('Failed to update collection points: ' . $response->status());
+            Log::error('Failed to update collection points: ' . $response->status());
         }
     }
 }
