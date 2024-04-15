@@ -25,19 +25,21 @@ class UpdateCollectionPointsJob implements ShouldQueue
             ->withToken(env('TOKEN_FDGO_IN_MADRE'))
             ->asForm()
             ->get(sprintf(env('MADRE_COLLECTION_POINTS_ENDPOINT')));
-
+    
         if ($response->successful()) {
             DB::beginTransaction();
-
+    
             $collectionPointsData = $response->json();
-            
+    
             try {
-                CollectionPoint::truncate();
+                DB::table('collection_points')->truncate();
+
                 foreach ($collectionPointsData as $pointData) {
                     unset($pointData['created_at']);
                     unset($pointData['updated_at']);
-                    CollectionPoint::insert($pointData);
+                    DB::table('collection_points')->insert($pointData);
                 }
+    
                 DB::commit();
                 Log::info('Collection points updated successfully.');
             } catch (Exception $e) {
@@ -48,5 +50,5 @@ class UpdateCollectionPointsJob implements ShouldQueue
         } else {
             Log::error('Failed to update collection points: ' . $response->status());
         }
-    }
+    }    
 }
