@@ -14,10 +14,18 @@ class CollectionPointController extends APIController
         $zipCode = $request->input('zip');
 
         // Intenta recuperar los datos de la caché utilizando el código postal como clave
-        $collectionPoints = Cache::remember('collection_points_' . $zipCode, 43200, function () use ($zipCode) {
+        $cacheKey = 'collection_points_' . $zipCode;
+        if (Cache::has($cacheKey)) {
+            $collectionPoints = Cache::get($cacheKey);
+        } else {
             // Si los datos no están en caché, realiza la consulta a la base de datos filtrando por código postal
-            return CollectionPoint::where('postal_code', $zipCode)->get();
-        });
+            $collectionPoints = CollectionPoint::where('postal_code', $zipCode)->get();
+
+            // Si la consulta devuelve resultados, guarda en la caché
+            if ($collectionPoints->isNotEmpty()) {
+                Cache::put($cacheKey, $collectionPoints, 43200); // 12 horas
+            }
+        }
 
         return response()->json($collectionPoints);
     }
