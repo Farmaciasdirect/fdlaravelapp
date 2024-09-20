@@ -14,6 +14,7 @@ class CollectionPoint extends Model
     protected $fillable = [
         'agency',
         'code',
+        'new_code',
         'name',
         'address',
         'postal_code',
